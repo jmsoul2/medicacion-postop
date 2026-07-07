@@ -19,18 +19,24 @@
   }
   .wrap{max-width:640px;margin:0 auto;padding:16px}
 
-  header{padding:22px 18px 14px;text-align:center}
+  header{padding:22px 18px 10px;text-align:center}
   header h1{margin:0;font-size:22px;letter-spacing:.2px}
   header .sub{color:var(--muted);font-size:14px;margin-top:4px}
   header .name{display:inline-block;margin-top:10px;background:var(--accent);color:#fff;
     padding:5px 16px;border-radius:999px;font-size:14px;font-weight:600}
+
+  .syncbadge{display:block;width:100%;text-align:center;margin:0 0 14px;border:none;
+    background:#eef3f2;color:var(--muted);padding:8px;border-radius:999px;font-size:12.5px;
+    font-weight:600;cursor:pointer}
+  .syncbadge.ok{background:#e3f4ec;color:#1f8a5b}
+  .syncbadge.wait{background:#fff5e0;color:#a5761f}
+  .syncbadge.off{background:#fdeceb;color:#b23b34}
 
   .disclaimer{
     background:#fff7ea;border:1px solid #f2dcae;color:#8a6a2b;
     border-radius:14px;padding:12px 14px;font-size:12.5px;margin:0 0 16px;
   }
   .disclaimer b{color:#7a5b1f}
-  .disclaimer a{color:#7a5b1f;font-weight:700;text-decoration:none;white-space:nowrap}
 
   /* Settings */
   .settings{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
@@ -47,6 +53,16 @@
   .setrow input[type=time]{font-size:16px;padding:8px 10px;border:1.5px solid var(--accent-soft);
     border-radius:10px;color:var(--ink);background:#fbfefe;font-family:inherit}
   .sethint{padding:0 16px 14px;font-size:12px;color:var(--muted)}
+
+  .syncsec{border-top:1px solid var(--line);padding:14px 16px;background:#f7fbfa}
+  .syncsec h4{margin:0 0 4px;font-size:14px}
+  .syncsec p{margin:0 0 10px;font-size:12px;color:var(--muted)}
+  .syncsec .row{display:flex;gap:8px}
+  .syncsec input[type=text]{flex:1;font-size:16px;padding:9px 11px;border:1.5px solid var(--accent-soft);
+    border-radius:10px;color:var(--ink);background:#fff;font-family:inherit}
+  .syncsec button{background:var(--accent);color:#fff;border:none;padding:0 16px;border-radius:10px;
+    font-weight:700;font-size:13.5px;cursor:pointer}
+  .syncstatus{margin-top:9px;font-size:12px;font-weight:600}
 
   /* Day navigator */
   .daynav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -73,7 +89,6 @@
   .todaybtn{display:block;width:100%;margin:0 0 14px;background:var(--accent-soft);
     color:var(--accent);border:none;padding:10px;border-radius:12px;font-weight:700;font-size:13.5px;cursor:pointer}
 
-  /* progress */
   .progress{background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);
     border:1px solid var(--line);margin-bottom:16px}
   .progress .ptop{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
@@ -86,7 +101,6 @@
   .day1note{background:#eaf2ff;border:1px solid #cfe0fb;color:#3a5a8c;border-radius:12px;
     padding:10px 14px;font-size:12.5px;margin-bottom:14px}
 
-  /* time slot cards */
   .slot{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
     border:1px solid var(--line);margin-bottom:14px;overflow:hidden}
   .slot .shead{display:flex;align-items:center;gap:8px;padding:12px 16px;
@@ -114,10 +128,10 @@
   .med .dose{font-size:13px;color:var(--muted);margin-top:2px}
   .med .note{font-size:12px;color:#a06a2b;background:#fdf1dc;border-radius:8px;
     padding:5px 9px;margin-top:6px;display:inline-block}
+  .med .who{font-size:11px;color:var(--accent);margin-top:5px;font-weight:600}
   .med.on .nm,.med.on .dose{text-decoration:line-through;color:var(--done)}
   .med.on .icon{filter:grayscale(1);opacity:.5}
 
-  /* reference */
   details.ref{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
     border:1px solid var(--line);margin-top:20px;overflow:hidden}
   details.ref summary{padding:15px 16px;font-weight:700;cursor:pointer;list-style:none;
@@ -145,13 +159,15 @@
     <div class="name">Susana</div>
   </header>
 
+  <button class="syncbadge" id="syncbadge">⚪ Toca para sincronizar entre celulares</button>
+
   <div class="disclaimer">
     <b>Importante:</b> Esta hoja organiza la medicación formulada por el médico para llevar el control día a día.
     No reemplaza las indicaciones médicas. Ante cualquier duda, dolor fuerte o irregularidad, comunícate de inmediato con tu médico.
   </div>
 
   <details class="settings" id="settings">
-    <summary>⚙️ Ajustar horarios <span class="arw">▾</span></summary>
+    <summary>⚙️ Ajustes <span class="arw">▾</span></summary>
     <div class="setrow">
       <div class="lbl">🕐 Primera toma el Día 1
         <small>La hora en que Susana llega a casa y empieza los medicamentos</small></div>
@@ -162,8 +178,17 @@
         <small>A qué hora arranca la mañana del Día 2 en adelante</small></div>
       <input type="time" id="normalstart" value="08:00">
     </div>
-    <div class="sethint">Todos los horarios de las tomas se recalculan solos a partir de estas horas
-      (cada 12 h, cada 8 h, cada 6 h, etc.).</div>
+    <div class="sethint">Los horarios de las tomas se recalculan solos a partir de estas horas.</div>
+
+    <div class="syncsec">
+      <h4>🔄 Sincronizar entre celulares</h4>
+      <p>Escribe el <b>mismo código</b> en el celular de Susy y en el tuyo (invéntate uno, por ejemplo <b>susy-nariz-2026</b>). Solo quienes tengan ese código comparten el seguimiento.</p>
+      <div class="row">
+        <input type="text" id="synccode" placeholder="ej: susy-nariz-2026" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button id="syncsave">Conectar</button>
+      </div>
+      <div class="syncstatus" id="syncstatus"></div>
+    </div>
   </details>
 
   <div class="daynav">
@@ -204,64 +229,68 @@
   </footer>
 </div>
 
+<!-- Firebase (sincronización opcional; la app funciona local aunque esto falle) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
-/* ===== Configuración ===== */
+/* ====== CONFIG DE FIREBASE ======
+   Pega aquí el objeto firebaseConfig que te da la consola de Firebase. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAWb_21HhDEurZy7Xj-rolEd4kcQF0f8Fw",
+  authDomain: "medicacion-susy.firebaseapp.com",
+  databaseURL: "https://medicacion-susy-default-rtdb.firebaseio.com",
+  projectId: "medicacion-susy",
+  storageBucket: "medicacion-susy.firebasestorage.app",
+  messagingSenderId: "108922857004",
+  appId: "1:108922857004:web:05a8e12b208172acec5389"
+};
+const HAS_FB = !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey);
+
+/* ===== Configuración del tratamiento ===== */
 const START = new Date(2026, 6, 7); // Día 1 = 7 de julio de 2026 (día de la cirugía)
 const TOTAL_DAYS = 30;
 
 const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-/* Medicamentos:
-   - intervalH + perDay  -> dosis se generan cada X horas desde la hora de inicio del día
-   - perDay:1 (sin intervalH) -> 1 vez al día, a la hora de inicio
-   - fixed:[min...]      -> horas fijas de reloj (independientes del inicio), p.ej. bloqueador solar
-*/
 const MEDS = [
   { id:'clavutek', nm:'Clavutek', purpose:'Antibiótico', icon:'💊',
     dose:'1 tableta (1 g)', freq:'Cada 12 horas · 7 días',
     intervalH:12, perDay:2, from:1, to:7 },
-
   { id:'dolex', nm:'Dolex', purpose:'Para el dolor', icon:'💊',
     dose:'1 tableta (500 mg)', freq:'Cada 6 horas · 5 días',
     intervalH:6, perDay:4, from:1, to:5 },
-
   { id:'anexia', nm:'Anexia', purpose:'Antiinflamatorio', icon:'💊',
     dose:'1 tableta (120 mg)', freq:'1 vez al día · 5 días',
     perDay:1, from:1, to:5 },
-
   { id:'alerfast', nm:'Alerfast', purpose:'Antialérgico', icon:'💊',
     dose:'1 tableta (180 mg)', freq:'1 vez al día · 10 días',
     perDay:1, from:1, to:10 },
-
   { id:'duodecadron', nm:'Duodecadron', purpose:'Corticoide (inyección)', icon:'💉',
     dose:'1 ampolla IM (8 mg)', freq:'Dosis única · el día después de la cirugía',
     perDay:1, from:2, to:2,
     note:'Aplicación intramuscular (IM). Idealmente la aplica una enfermera.' },
-
   { id:'tranexam', nm:'Tranexam', purpose:'Control de sangrado', icon:'💊',
     dose:'1 tableta (500 mg)', freq:'Cada 8 horas · 7 días',
     intervalH:8, perDay:3, from:1, to:7 },
-
   { id:'openxy', nm:'Openxy 0.05%', purpose:'Descongestionante nasal', icon:'👃',
     dose:'2 atomizaciones en cada fosa nasal', freq:'Cada 12 horas · 7 días',
     intervalH:12, perDay:2, from:1, to:7 },
-
   { id:'lavado', nm:'Lavado nasal', purpose:'Higiene nasal', icon:'🌊',
     dose:'Kit de lavado + 1 ampolla de Gentamicina (80 mg)', freq:'Cada 12 horas · 30 días',
     intervalH:12, perDay:2, from:1, to:30,
     note:'Al terminar el kit, prepararlo de nuevo y continuar los lavados por 1 mes.' },
-
   { id:'tonimer', nm:'Tonimer con Panthexyl', purpose:'Hidratación nasal', icon:'💧',
     dose:'1 atomización en cada fosa nasal', freq:'Cada 6 horas · 30 días',
     intervalH:6, perDay:4, from:1, to:30 },
-
   { id:'bloqueador', nm:'Bloqueador solar', purpose:'Protección de la piel', icon:'☀️',
     dose:'Aplicar en toda la cara', freq:'8 AM · 11 AM · 3 PM',
     fixed:[480,660,900], from:1, to:30 },
 ];
 
-/* ===== Utilidades de fecha ===== */
+const SLOT_LABEL = ['Madrugada','Mañana','Tarde','Noche'];
+
+/* ===== Utilidades ===== */
 function dateForDay(n){ const d=new Date(START); d.setDate(d.getDate()+(n-1)); return d; }
 function isoForDay(n){ const d=dateForDay(n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function fmtDate(d){ return DIAS[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]; }
@@ -273,54 +302,130 @@ function todayDayNumber(){
   return Math.min(Math.max(diff,1),TOTAL_DAYS);
 }
 function key(iso,medId,off){ return 'susana_med::'+iso+'::'+medId+'::'+off; }
-
-/* ===== Ajustes (persistentes) ===== */
 function getStart(id,def){ const v=localStorage.getItem('susana_cfg_'+id); return v!==null?v:def; }
 function timeToMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
 
-/* ===== Estado ===== */
+/* ===== Estado local-first ===== */
+const LS_STATE='susana_state_v2';
+const LS_CODE='susana_sync_code';
+let state={};                 // key -> {v:0|1, t:timestamp}
+let db=null, stateRef=null, connRef=null;
+let syncOnline=false;
+
+function loadLocal(){
+  try{ state=JSON.parse(localStorage.getItem(LS_STATE))||{}; }catch(e){ state={}; }
+  // migrar formato anterior (valor "1" por clave)
+  Object.keys(localStorage).forEach(k=>{
+    if(k.indexOf('susana_med::')===0 && localStorage.getItem(k)==='1' && !state[k]){
+      state[k]={v:1,t:0};
+    }
+  });
+}
+function saveLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+function getVal(k){ const e=state[k]; return (e&&e.v)?1:0; }
+function fbKey(k){ return k.replace(/[.#$/\[\]]/g,'_'); }
+function setVal(k,v){
+  state[k]={v:v?1:0, t:Date.now()};
+  saveLocal();
+  if(stateRef){ try{ stateRef.child(fbKey(k)).set({v:v?1:0, t:state[k].t, k:k}); }catch(e){} }
+}
+
+/* ===== Sincronización ===== */
+function mergeRemote(remote){
+  let changed=false;
+  Object.keys(remote).forEach(fk=>{
+    const r=remote[fk]; if(!r||!r.k) return;
+    const k=r.k, l=state[k];
+    if(!l || (r.t||0)>(l.t||0)){ state[k]={v:r.v?1:0, t:r.t||0}; changed=true; }
+  });
+  if(changed) saveLocal();
+  render();
+}
+function connectSync(){
+  const code=(localStorage.getItem(LS_CODE)||'').trim();
+  updateSyncUI();
+  if(!code || !HAS_FB || typeof firebase==='undefined') return;
+  try{
+    if(!db){ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }
+  }catch(e){ try{ db=firebase.database(); }catch(e2){ updateSyncUI('error'); return; } }
+
+  if(stateRef){ stateRef.off(); stateRef=null; }
+  const path='families/'+code.toLowerCase().replace(/[.#$/\[\]\s]/g,'_')+'/state';
+  stateRef=db.ref(path);
+
+  // Primera sincronización: fusiona en ambos sentidos, luego escucha en vivo
+  stateRef.once('value').then(snap=>{
+    const remote=snap.val()||{};
+    Object.keys(remote).forEach(fk=>{
+      const r=remote[fk]; if(!r||!r.k) return;
+      const l=state[r.k];
+      if(!l || (r.t||0)>(l.t||0)) state[r.k]={v:r.v?1:0, t:r.t||0};
+    });
+    // Sube lo que este celular tenga marcado y que allá falte o sea más antiguo
+    const updates={}; const seen={};
+    Object.keys(remote).forEach(fk=>{ if(remote[fk]&&remote[fk].k) seen[remote[fk].k]=remote[fk]; });
+    Object.keys(state).forEach(k=>{
+      const l=state[k]; if(!l||!l.v) return;
+      const r=seen[k];
+      if(!r || (l.t||0)>=(r.t||0)) updates[fbKey(k)]={v:1, t:l.t||1, k:k};
+    });
+    saveLocal(); render();
+    if(Object.keys(updates).length) stateRef.update(updates).catch(()=>{});
+    stateRef.on('value', s=>{ mergeRemote(s.val()||{}); });
+  }).catch(()=>{ updateSyncUI('error'); });
+
+  if(!connRef){
+    connRef=db.ref('.info/connected');
+    connRef.on('value', s=>{ syncOnline=!!s.val(); updateSyncUI(); });
+  }
+}
+function updateSyncUI(force){
+  const badge=document.getElementById('syncbadge');
+  const status=document.getElementById('syncstatus');
+  const code=(localStorage.getItem(LS_CODE)||'').trim();
+  let cls='off', txt, stxt, scol;
+  if(!HAS_FB){ cls=''; txt='⚪ Sincronización no configurada'; stxt='La sincronización aún no está activada en esta página.'; scol='var(--muted)'; }
+  else if(!code){ cls=''; txt='⚪ Toca para sincronizar entre celulares'; stxt=''; scol='var(--muted)'; }
+  else if(force==='error'){ cls='off'; txt='🔴 Error de sincronización'; stxt='No se pudo conectar. Revisa el código o la conexión.'; scol='#b23b34'; }
+  else if(syncOnline){ cls='ok'; txt='🟢 Sincronizado ('+code+')'; stxt='✔ Conectado. Los cambios se comparten con el otro celular.'; scol='#1f8a5b'; }
+  else{ cls='wait'; txt='🟡 Conectando… ('+code+')'; stxt='Conectando…'; scol='#a5761f'; }
+  if(badge){ badge.className='syncbadge '+cls; badge.textContent=txt; }
+  if(status){ status.textContent=stxt; status.style.color=scol; }
+}
+
+/* ===== Estado de UI ===== */
 let currentDay = todayDayNumber();
 
-/* ===== Generar dosis de un día ===== */
 function dosesForDay(n){
-  const day1Min = timeToMin(getStart('day1','15:00'));
-  const normalMin = timeToMin(getStart('normal','08:00'));
-  const startMin = (n===1) ? day1Min : normalMin;
+  const day1Min=timeToMin(getStart('day1','15:00'));
+  const normalMin=timeToMin(getStart('normal','08:00'));
+  const startMin=(n===1)?day1Min:normalMin;
   const list=[];
-
   MEDS.forEach(m=>{
     if(n<m.from || n>m.to) return;
-
-    if(m.fixed){ // horas fijas de reloj (bloqueador solar)
+    if(m.fixed){
       m.fixed.forEach(clk=>{
-        if(n===1 && clk<startMin) return; // el día 1, solo desde que llega a casa
-        const off = (clk - startMin + 1440) % 1440;
-        list.push({med:m, off, clock:clk, rolled:false});
+        if(n===1 && clk<startMin) return;
+        list.push({med:m, off:(clk-startMin+1440)%1440, clock:clk});
       });
       return;
     }
-
-    const doses = m.perDay || 1;
-    const step = (m.intervalH || 24) * 60;
+    const doses=m.perDay||1, step=(m.intervalH||24)*60;
     for(let k=0;k<doses;k++){
-      const off = k*step;
-      const abs = startMin + off;
-      if(n===1 && abs>=1440) break; // el día 1 no pasamos de medianoche (se retoma el día 2)
-      list.push({med:m, off, clock:abs%1440, rolled:abs>=1440});
+      const off=k*step, abs=startMin+off;
+      if(n===1 && abs>=1440) break;
+      list.push({med:m, off, clock:abs%1440});
     }
   });
   return list;
 }
 
-/* ===== Render ===== */
 function render(){
-  const iso=isoForDay(currentDay);
-  const d=dateForDay(currentDay);
+  const iso=isoForDay(currentDay), d=dateForDay(currentDay);
   document.getElementById('dnum').textContent='Día '+currentDay+(currentDay===1?' · Día de la cirugía':'');
   document.getElementById('ddate').textContent=fmtDate(d);
-  document.getElementById('day1note').style.display = currentDay===1 ? 'block':'none';
+  document.getElementById('day1note').style.display=currentDay===1?'block':'none';
 
-  // pills
   const pills=document.getElementById('pills'); pills.innerHTML='';
   const tdn=todayDayNumber();
   for(let i=1;i<=TOTAL_DAYS;i++){
@@ -331,33 +436,24 @@ function render(){
     p.onclick=()=>{currentDay=i;render();};
     pills.appendChild(p);
   }
-  const active=pills.querySelector('.pill.active');
-  if(active) active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  const act=pills.querySelector('.pill.active');
+  if(act) act.scrollIntoView({inline:'center',block:'nearest'});
 
-  // agrupar dosis por hora de reloj, ordenar por tiempo desde la 1ª toma
-  const doses=dosesForDay(currentDay);
-  const groups={};
-  doses.forEach(x=>{ (groups[x.clock]=groups[x.clock]||{off:x.off,items:[]}); groups[x.clock].items.push(x); if(x.off<groups[x.clock].off)groups[x.clock].off=x.off; });
+  const doses=dosesForDay(currentDay), groups={};
+  doses.forEach(x=>{ if(!groups[x.clock])groups[x.clock]={off:x.off,items:[]}; groups[x.clock].items.push(x); if(x.off<groups[x.clock].off)groups[x.clock].off=x.off; });
   const clocks=Object.keys(groups).map(Number).sort((a,b)=>groups[a].off-groups[b].off);
 
   const slots=document.getElementById('slots'); slots.innerHTML='';
   let total=0, done=0;
-
   clocks.forEach(clk=>{
-    const g=groups[clk];
-    const h=Math.floor(clk/60);
-    const isNight = (h>=20 || h<5);
+    const g=groups[clk], h=Math.floor(clk/60), isNight=(h>=20||h<5);
     const slot=document.createElement('div'); slot.className='slot';
     const head=document.createElement('div'); head.className='shead'+(isNight?' night':'');
-    head.innerHTML=(isNight?'🌙 ':'🕐 ')+to12(clk)+
-      (g.off===0?'<span class="firstbadge">1ª toma</span>':'')+
-      '<span class="tod">'+slotLabel(clk)+'</span>';
+    head.innerHTML=(isNight?'🌙 ':'🕐 ')+to12(clk)+(g.off===0?'<span class="firstbadge">1ª toma</span>':'')+'<span class="tod">'+slotLabel(clk)+'</span>';
     slot.appendChild(head);
-
     g.items.forEach(x=>{
       const m=x.med; total++;
-      const k=key(iso,m.id,x.off);
-      const on=localStorage.getItem(k)==='1'; if(on)done++;
+      const k=key(iso,m.id,x.off), on=getVal(k)===1; if(on)done++;
       const row=document.createElement('div'); row.className='med'+(on?' on':'');
       row.innerHTML=
         '<div class="chk"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
@@ -366,10 +462,7 @@ function render(){
         '<div class="dose">'+m.dose+'</div>'+
         (m.note?'<div class="note">ℹ️ '+m.note+'</div>':'')+
         '</div>';
-      row.onclick=()=>{
-        if(localStorage.getItem(k)==='1')localStorage.removeItem(k); else localStorage.setItem(k,'1');
-        render();
-      };
+      row.onclick=()=>{ setVal(k, on?0:1); render(); };
       slot.appendChild(row);
     });
     slots.appendChild(slot);
@@ -381,12 +474,11 @@ function render(){
   document.getElementById('donemsg').style.display=(total&&done===total)?'block':'none';
 }
 
-/* ===== Referencia ===== */
 function renderRef(){
   const box=document.getElementById('reflist'); box.innerHTML='';
   MEDS.forEach(m=>{
     const el=document.createElement('div'); el.className='refitem';
-    const dur = m.from===m.to ? ('Día '+m.from) : ('Días '+m.from+' a '+m.to);
+    const dur=m.from===m.to?('Día '+m.from):('Días '+m.from+' a '+m.to);
     el.innerHTML='<div class="rnm">'+m.icon+' '+m.nm+' · <span style="color:var(--accent)">'+m.purpose+'</span></div>'+
       '<div class="rmeta">'+m.dose+' — '+m.freq+'</div>'+
       (m.note?'<div class="rmeta">ℹ️ '+m.note+'</div>':'')+
@@ -402,8 +494,19 @@ document.getElementById('todaybtn').onclick=()=>{ currentDay=todayDayNumber(); r
 document.getElementById('resetday').onclick=()=>{
   if(!confirm('¿Desmarcar todas las tomas de este día?'))return;
   const iso=isoForDay(currentDay);
-  Object.keys(localStorage).filter(k=>k.startsWith('susana_med::'+iso+'::')).forEach(k=>localStorage.removeItem(k));
+  dosesForDay(currentDay).forEach(x=>{ setVal(key(iso,x.med.id,x.off),0); });
   render();
+};
+document.getElementById('syncbadge').onclick=()=>{
+  const s=document.getElementById('settings'); s.open=true;
+  s.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('synccode').focus();
+};
+document.getElementById('syncsave').onclick=()=>{
+  const code=document.getElementById('synccode').value.trim();
+  if(!code){ alert('Escribe un código de sincronización.'); return; }
+  localStorage.setItem(LS_CODE, code);
+  connectSync();
 };
 
 const d1=document.getElementById('day1start'), ns=document.getElementById('normalstart');
@@ -411,8 +514,16 @@ d1.value=getStart('day1','15:00'); ns.value=getStart('normal','08:00');
 d1.onchange=()=>{ localStorage.setItem('susana_cfg_day1', d1.value); render(); };
 ns.onchange=()=>{ localStorage.setItem('susana_cfg_normal', ns.value); render(); };
 
+document.getElementById('synccode').value=(localStorage.getItem(LS_CODE)||'');
+
+/* ===== Arranque ===== */
+loadLocal();
 renderRef();
 render();
+updateSyncUI();
+connectSync();
+// Re-sincroniza al volver a la pestaña
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) connectSync(); });
 </script>
 </body>
 </html>

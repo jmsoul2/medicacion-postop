@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicación Post-Operatoria · Susana</title>
+<style>
+  :root{
+    --bg:#eef4f3; --card:#ffffff; --ink:#1f3b3a; --muted:#6b8482;
+    --accent:#2f8f83; --accent-soft:#d7ece8; --line:#e2ecea;
+    --done:#a7c7c1; --night:#5b6fb0;
+    --shadow:0 6px 20px rgba(31,59,58,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#eef4f3,#e4efec);color:var(--ink);
+    line-height:1.45;padding:0 0 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:16px}
+
+  header{padding:22px 18px 14px;text-align:center}
+  header h1{margin:0;font-size:22px;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:14px;margin-top:4px}
+  header .name{display:inline-block;margin-top:10px;background:var(--accent);color:#fff;
+    padding:5px 16px;border-radius:999px;font-size:14px;font-weight:600}
+
+  .disclaimer{
+    background:#fff7ea;border:1px solid #f2dcae;color:#8a6a2b;
+    border-radius:14px;padding:12px 14px;font-size:12.5px;margin:0 0 16px;
+  }
+  .disclaimer b{color:#7a5b1f}
+  .disclaimer a{color:#7a5b1f;font-weight:700;text-decoration:none;white-space:nowrap}
+
+  /* Settings */
+  .settings{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    border:1px solid var(--line);margin-bottom:16px;overflow:hidden}
+  .settings summary{padding:14px 16px;font-weight:700;cursor:pointer;list-style:none;
+    display:flex;align-items:center;gap:8px;font-size:15px}
+  .settings summary::-webkit-details-marker{display:none}
+  .settings summary .arw{margin-left:auto;transition:.2s;color:var(--muted)}
+  .settings[open] summary .arw{transform:rotate(180deg)}
+  .setrow{padding:12px 16px;border-top:1px solid var(--line);display:flex;
+    align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .setrow .lbl{font-size:13.5px;font-weight:600;flex:1;min-width:180px}
+  .setrow .lbl small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .setrow input[type=time]{font-size:16px;padding:8px 10px;border:1.5px solid var(--accent-soft);
+    border-radius:10px;color:var(--ink);background:#fbfefe;font-family:inherit}
+  .sethint{padding:0 16px 14px;font-size:12px;color:var(--muted)}
+
+  /* Day navigator */
+  .daynav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .daynav button.arrow{
+    background:var(--card);border:1px solid var(--line);color:var(--accent);
+    width:42px;height:42px;border-radius:12px;font-size:20px;cursor:pointer;box-shadow:var(--shadow);flex:none
+  }
+  .daynav button.arrow:active{transform:scale(.94)}
+  .dayinfo{flex:1;text-align:center;background:var(--card);border-radius:14px;
+    padding:8px 10px;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .dayinfo .dnum{font-size:15px;font-weight:700}
+  .dayinfo .ddate{font-size:12.5px;color:var(--muted);text-transform:capitalize}
+
+  .pills{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:thin}
+  .pills::-webkit-scrollbar{height:6px}
+  .pills::-webkit-scrollbar-thumb{background:#cfe0dc;border-radius:9px}
+  .pill{flex:none;min-width:40px;text-align:center;padding:7px 4px;border-radius:11px;
+    background:var(--card);border:1px solid var(--line);font-size:12px;cursor:pointer;color:var(--muted)}
+  .pill .pn{font-weight:700;font-size:14px;color:var(--ink);display:block}
+  .pill.active{background:var(--accent);border-color:var(--accent);color:#eaf6f3}
+  .pill.active .pn{color:#fff}
+  .pill.today{outline:2px solid var(--accent);outline-offset:1px}
+
+  .todaybtn{display:block;width:100%;margin:0 0 14px;background:var(--accent-soft);
+    color:var(--accent);border:none;padding:10px;border-radius:12px;font-weight:700;font-size:13.5px;cursor:pointer}
+
+  /* progress */
+  .progress{background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);
+    border:1px solid var(--line);margin-bottom:16px}
+  .progress .ptop{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+  .progress .ptop b{color:var(--accent)}
+  .bar{height:10px;background:var(--accent-soft);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,#3aa89a,#2f8f83);
+    width:0;transition:width .35s ease;border-radius:999px}
+  .donemsg{text-align:center;color:var(--accent);font-weight:700;font-size:13.5px;margin-top:10px;display:none}
+
+  .day1note{background:#eaf2ff;border:1px solid #cfe0fb;color:#3a5a8c;border-radius:12px;
+    padding:10px 14px;font-size:12.5px;margin-bottom:14px}
+
+  /* time slot cards */
+  .slot{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    border:1px solid var(--line);margin-bottom:14px;overflow:hidden}
+  .slot .shead{display:flex;align-items:center;gap:8px;padding:12px 16px;
+    background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:15px}
+  .slot .shead .tod{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--muted);
+    background:#fff;padding:3px 10px;border-radius:999px}
+  .slot .shead.night{background:#e8ebf7;color:var(--night)}
+  .slot .shead.night .tod{color:var(--night)}
+  .firstbadge{font-size:10.5px;font-weight:700;background:var(--accent);color:#fff;
+    padding:2px 8px;border-radius:999px;margin-left:2px}
+
+  .med{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-top:1px solid var(--line);cursor:pointer}
+  .med:first-of-type{border-top:none}
+  .med .chk{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;margin-top:2px;transition:.15s}
+  .med .chk svg{width:16px;height:16px;stroke:#fff;stroke-width:3.4;fill:none;
+    stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:.15s}
+  .med.on .chk{background:var(--accent)}
+  .med.on .chk svg{opacity:1}
+  .med .icon{font-size:22px;flex:none;line-height:1;margin-top:1px}
+  .med .body{flex:1;min-width:0}
+  .med .nm{font-weight:700;font-size:15px}
+  .med .purpose{font-size:12px;color:#fff;background:var(--accent);display:inline-block;
+    padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;font-weight:600}
+  .med .dose{font-size:13px;color:var(--muted);margin-top:2px}
+  .med .note{font-size:12px;color:#a06a2b;background:#fdf1dc;border-radius:8px;
+    padding:5px 9px;margin-top:6px;display:inline-block}
+  .med.on .nm,.med.on .dose{text-decoration:line-through;color:var(--done)}
+  .med.on .icon{filter:grayscale(1);opacity:.5}
+
+  /* reference */
+  details.ref{background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    border:1px solid var(--line);margin-top:20px;overflow:hidden}
+  details.ref summary{padding:15px 16px;font-weight:700;cursor:pointer;list-style:none;
+    display:flex;align-items:center;gap:8px;font-size:15px}
+  details.ref summary::-webkit-details-marker{display:none}
+  details.ref summary .arw{margin-left:auto;transition:.2s;color:var(--muted)}
+  details.ref[open] summary .arw{transform:rotate(180deg)}
+  .refitem{padding:12px 16px;border-top:1px solid var(--line);font-size:13px}
+  .refitem .rnm{font-weight:700;font-size:14px}
+  .refitem .rmeta{color:var(--muted);margin-top:3px}
+  .refitem .rdur{display:inline-block;background:var(--accent-soft);color:var(--accent);
+    font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;margin-top:6px}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;padding:0 10px}
+  footer a{color:var(--accent);font-weight:700;text-decoration:none}
+  .resetday{display:block;margin:16px auto 0;background:none;border:none;color:var(--muted);
+    font-size:12.5px;text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>💊 Medicación Post-Operatoria</h1>
+    <div class="sub">Guía diaria · Cirugía de nariz</div>
+    <div class="name">Susana</div>
+  </header>
+
+  <div class="disclaimer">
+    <b>Importante:</b> Esta hoja organiza la medicación formulada por el médico para llevar el control día a día.
+    No reemplaza las indicaciones médicas. Ante cualquier duda, dolor fuerte o irregularidad, comunícate de inmediato con tu médico.
+  </div>
+
+  <details class="settings" id="settings">
+    <summary>⚙️ Ajustar horarios <span class="arw">▾</span></summary>
+    <div class="setrow">
+      <div class="lbl">🕐 Primera toma el Día 1
+        <small>La hora en que Susana llega a casa y empieza los medicamentos</small></div>
+      <input type="time" id="day1start" value="15:00">
+    </div>
+    <div class="setrow">
+      <div class="lbl">🌅 Hora de inicio los demás días
+        <small>A qué hora arranca la mañana del Día 2 en adelante</small></div>
+      <input type="time" id="normalstart" value="08:00">
+    </div>
+    <div class="sethint">Todos los horarios de las tomas se recalculan solos a partir de estas horas
+      (cada 12 h, cada 8 h, cada 6 h, etc.).</div>
+  </details>
+
+  <div class="daynav">
+    <button class="arrow" id="prev" aria-label="Día anterior">‹</button>
+    <div class="dayinfo">
+      <div class="dnum" id="dnum">Día 1</div>
+      <div class="ddate" id="ddate">—</div>
+    </div>
+    <button class="arrow" id="next" aria-label="Día siguiente">›</button>
+  </div>
+
+  <div class="pills" id="pills"></div>
+  <button class="todaybtn" id="todaybtn">📍 Ir al día de hoy</button>
+
+  <div class="day1note" id="day1note" style="display:none">
+    🏥 <b>Día de la cirugía.</b> Los medicamentos se inician al llegar a casa. Esta primera tarde/noche
+    solo se toman las dosis que alcancen antes de dormir; al día siguiente se retoma el horario completo.
+  </div>
+
+  <div class="progress">
+    <div class="ptop"><span>Progreso del día</span><span><b id="pcount">0</b> de <span id="ptotal">0</span> tomas</span></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="donemsg" id="donemsg">✅ ¡Todo tomado por hoy! Bien hecho 💚</div>
+  </div>
+
+  <div id="slots"></div>
+
+  <button class="resetday" id="resetday">Desmarcar todo este día</button>
+
+  <details class="ref">
+    <summary>📋 Ver todos los medicamentos <span class="arw">▾</span></summary>
+    <div id="reflist"></div>
+  </details>
+
+  <footer>
+    Los medicamentos deben iniciarse el mismo día de la cirugía, una vez en casa.<br>
+    Hecho con cariño para Susana 💚
+  </footer>
+</div>
+
+<script>
+/* ===== Configuración ===== */
+const START = new Date(2026, 6, 7); // Día 1 = 7 de julio de 2026 (día de la cirugía)
+const TOTAL_DAYS = 30;
+
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+/* Medicamentos:
+   - intervalH + perDay  -> dosis se generan cada X horas desde la hora de inicio del día
+   - perDay:1 (sin intervalH) -> 1 vez al día, a la hora de inicio
+   - fixed:[min...]      -> horas fijas de reloj (independientes del inicio), p.ej. bloqueador solar
+*/
+const MEDS = [
+  { id:'clavutek', nm:'Clavutek', purpose:'Antibiótico', icon:'💊',
+    dose:'1 tableta (1 g)', freq:'Cada 12 horas · 7 días',
+    intervalH:12, perDay:2, from:1, to:7 },
+
+  { id:'dolex', nm:'Dolex', purpose:'Para el dolor', icon:'💊',
+    dose:'1 tableta (500 mg)', freq:'Cada 6 horas · 5 días',
+    intervalH:6, perDay:4, from:1, to:5 },
+
+  { id:'anexia', nm:'Anexia', purpose:'Antiinflamatorio', icon:'💊',
+    dose:'1 tableta (120 mg)', freq:'1 vez al día · 5 días',
+    perDay:1, from:1, to:5 },
+
+  { id:'alerfast', nm:'Alerfast', purpose:'Antialérgico', icon:'💊',
+    dose:'1 tableta (180 mg)', freq:'1 vez al día · 10 días',
+    perDay:1, from:1, to:10 },
+
+  { id:'duodecadron', nm:'Duodecadron', purpose:'Corticoide (inyección)', icon:'💉',
+    dose:'1 ampolla IM (8 mg)', freq:'Dosis única · el día después de la cirugía',
+    perDay:1, from:2, to:2,
+    note:'Aplicación intramuscular (IM). Idealmente la aplica una enfermera.' },
+
+  { id:'tranexam', nm:'Tranexam', purpose:'Control de sangrado', icon:'💊',
+    dose:'1 tableta (500 mg)', freq:'Cada 8 horas · 7 días',
+    intervalH:8, perDay:3, from:1, to:7 },
+
+  { id:'openxy', nm:'Openxy 0.05%', purpose:'Descongestionante nasal', icon:'👃',
+    dose:'2 atomizaciones en cada fosa nasal', freq:'Cada 12 horas · 7 días',
+    intervalH:12, perDay:2, from:1, to:7 },
+
+  { id:'lavado', nm:'Lavado nasal', purpose:'Higiene nasal', icon:'🌊',
+    dose:'Kit de lavado + 1 ampolla de Gentamicina (80 mg)', freq:'Cada 12 horas · 30 días',
+    intervalH:12, perDay:2, from:1, to:30,
+    note:'Al terminar el kit, prepararlo de nuevo y continuar los lavados por 1 mes.' },
+
+  { id:'tonimer', nm:'Tonimer con Panthexyl', purpose:'Hidratación nasal', icon:'💧',
+    dose:'1 atomización en cada fosa nasal', freq:'Cada 6 horas · 30 días',
+    intervalH:6, perDay:4, from:1, to:30 },
+
+  { id:'bloqueador', nm:'Bloqueador solar', purpose:'Protección de la piel', icon:'☀️',
+    dose:'Aplicar en toda la cara', freq:'8 AM · 11 AM · 3 PM',
+    fixed:[480,660,900], from:1, to:30 },
+];
+
+/* ===== Utilidades de fecha ===== */
+function dateForDay(n){ const d=new Date(START); d.setDate(d.getDate()+(n-1)); return d; }
+function isoForDay(n){ const d=dateForDay(n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtDate(d){ return DIAS[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]; }
+function to12(min){ min=((min%1440)+1440)%1440; let h=Math.floor(min/60), m=min%60; const ap=h<12?'AM':'PM'; let hh=h%12; if(hh===0)hh=12; return hh+':'+String(m).padStart(2,'0')+' '+ap; }
+function slotLabel(min){ const h=Math.floor((((min%1440)+1440)%1440)/60); if(h<5)return'Madrugada'; if(h<12)return'Mañana'; if(h<18)return'Tarde'; return'Noche'; }
+function todayDayNumber(){
+  const now=new Date(); const t=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const diff=Math.round((t-START)/86400000)+1;
+  return Math.min(Math.max(diff,1),TOTAL_DAYS);
+}
+function key(iso,medId,off){ return 'susana_med::'+iso+'::'+medId+'::'+off; }
+
+/* ===== Ajustes (persistentes) ===== */
+function getStart(id,def){ const v=localStorage.getItem('susana_cfg_'+id); return v!==null?v:def; }
+function timeToMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
+
+/* ===== Estado ===== */
+let currentDay = todayDayNumber();
+
+/* ===== Generar dosis de un día ===== */
+function dosesForDay(n){
+  const day1Min = timeToMin(getStart('day1','15:00'));
+  const normalMin = timeToMin(getStart('normal','08:00'));
+  const startMin = (n===1) ? day1Min : normalMin;
+  const list=[];
+
+  MEDS.forEach(m=>{
+    if(n<m.from || n>m.to) return;
+
+    if(m.fixed){ // horas fijas de reloj (bloqueador solar)
+      m.fixed.forEach(clk=>{
+        if(n===1 && clk<startMin) return; // el día 1, solo desde que llega a casa
+        const off = (clk - startMin + 1440) % 1440;
+        list.push({med:m, off, clock:clk, rolled:false});
+      });
+      return;
+    }
+
+    const doses = m.perDay || 1;
+    const step = (m.intervalH || 24) * 60;
+    for(let k=0;k<doses;k++){
+      const off = k*step;
+      const abs = startMin + off;
+      if(n===1 && abs>=1440) break; // el día 1 no pasamos de medianoche (se retoma el día 2)
+      list.push({med:m, off, clock:abs%1440, rolled:abs>=1440});
+    }
+  });
+  return list;
+}
+
+/* ===== Render ===== */
+function render(){
+  const iso=isoForDay(currentDay);
+  const d=dateForDay(currentDay);
+  document.getElementById('dnum').textContent='Día '+currentDay+(currentDay===1?' · Día de la cirugía':'');
+  document.getElementById('ddate').textContent=fmtDate(d);
+  document.getElementById('day1note').style.display = currentDay===1 ? 'block':'none';
+
+  // pills
+  const pills=document.getElementById('pills'); pills.innerHTML='';
+  const tdn=todayDayNumber();
+  for(let i=1;i<=TOTAL_DAYS;i++){
+    const p=document.createElement('div');
+    p.className='pill'+(i===currentDay?' active':'')+(i===tdn?' today':'');
+    const dd=dateForDay(i);
+    p.innerHTML='<span class="pn">'+i+'</span>'+dd.getDate()+'/'+(dd.getMonth()+1);
+    p.onclick=()=>{currentDay=i;render();};
+    pills.appendChild(p);
+  }
+  const active=pills.querySelector('.pill.active');
+  if(active) active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+
+  // agrupar dosis por hora de reloj, ordenar por tiempo desde la 1ª toma
+  const doses=dosesForDay(currentDay);
+  const groups={};
+  doses.forEach(x=>{ (groups[x.clock]=groups[x.clock]||{off:x.off,items:[]}); groups[x.clock].items.push(x); if(x.off<groups[x.clock].off)groups[x.clock].off=x.off; });
+  const clocks=Object.keys(groups).map(Number).sort((a,b)=>groups[a].off-groups[b].off);
+
+  const slots=document.getElementById('slots'); slots.innerHTML='';
+  let total=0, done=0;
+
+  clocks.forEach(clk=>{
+    const g=groups[clk];
+    const h=Math.floor(clk/60);
+    const isNight = (h>=20 || h<5);
+    const slot=document.createElement('div'); slot.className='slot';
+    const head=document.createElement('div'); head.className='shead'+(isNight?' night':'');
+    head.innerHTML=(isNight?'🌙 ':'🕐 ')+to12(clk)+
+      (g.off===0?'<span class="firstbadge">1ª toma</span>':'')+
+      '<span class="tod">'+slotLabel(clk)+'</span>';
+    slot.appendChild(head);
+
+    g.items.forEach(x=>{
+      const m=x.med; total++;
+      const k=key(iso,m.id,x.off);
+      const on=localStorage.getItem(k)==='1'; if(on)done++;
+      const row=document.createElement('div'); row.className='med'+(on?' on':'');
+      row.innerHTML=
+        '<div class="chk"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>'+
+        '<div class="icon">'+m.icon+'</div>'+
+        '<div class="body"><div class="nm">'+m.nm+'<span class="purpose">'+m.purpose+'</span></div>'+
+        '<div class="dose">'+m.dose+'</div>'+
+        (m.note?'<div class="note">ℹ️ '+m.note+'</div>':'')+
+        '</div>';
+      row.onclick=()=>{
+        if(localStorage.getItem(k)==='1')localStorage.removeItem(k); else localStorage.setItem(k,'1');
+        render();
+      };
+      slot.appendChild(row);
+    });
+    slots.appendChild(slot);
+  });
+
+  document.getElementById('pcount').textContent=done;
+  document.getElementById('ptotal').textContent=total;
+  document.getElementById('pbar').style.width=(total?Math.round(done/total*100):0)+'%';
+  document.getElementById('donemsg').style.display=(total&&done===total)?'block':'none';
+}
+
+/* ===== Referencia ===== */
+function renderRef(){
+  const box=document.getElementById('reflist'); box.innerHTML='';
+  MEDS.forEach(m=>{
+    const el=document.createElement('div'); el.className='refitem';
+    const dur = m.from===m.to ? ('Día '+m.from) : ('Días '+m.from+' a '+m.to);
+    el.innerHTML='<div class="rnm">'+m.icon+' '+m.nm+' · <span style="color:var(--accent)">'+m.purpose+'</span></div>'+
+      '<div class="rmeta">'+m.dose+' — '+m.freq+'</div>'+
+      (m.note?'<div class="rmeta">ℹ️ '+m.note+'</div>':'')+
+      '<span class="rdur">'+dur+'</span>';
+    box.appendChild(el);
+  });
+}
+
+/* ===== Eventos ===== */
+document.getElementById('prev').onclick=()=>{ if(currentDay>1){currentDay--;render();} };
+document.getElementById('next').onclick=()=>{ if(currentDay<TOTAL_DAYS){currentDay++;render();} };
+document.getElementById('todaybtn').onclick=()=>{ currentDay=todayDayNumber(); render(); };
+document.getElementById('resetday').onclick=()=>{
+  if(!confirm('¿Desmarcar todas las tomas de este día?'))return;
+  const iso=isoForDay(currentDay);
+  Object.keys(localStorage).filter(k=>k.startsWith('susana_med::'+iso+'::')).forEach(k=>localStorage.removeItem(k));
+  render();
+};
+
+const d1=document.getElementById('day1start'), ns=document.getElementById('normalstart');
+d1.value=getStart('day1','15:00'); ns.value=getStart('normal','08:00');
+d1.onchange=()=>{ localStorage.setItem('susana_cfg_day1', d1.value); render(); };
+ns.onchange=()=>{ localStorage.setItem('susana_cfg_normal', ns.value); render(); };
+
+renderRef();
+render();
+</script>
+</body>
+</html>

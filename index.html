@@ -181,12 +181,8 @@
     <div class="sethint">Los horarios de las tomas se recalculan solos a partir de estas horas.</div>
 
     <div class="syncsec">
-      <h4>🔄 Sincronizar entre celulares</h4>
-      <p>Escribe el <b>mismo código</b> en el celular de Susy y en el tuyo (invéntate uno, por ejemplo <b>susy-nariz-2026</b>). Solo quienes tengan ese código comparten el seguimiento.</p>
-      <div class="row">
-        <input type="text" id="synccode" placeholder="ej: susy-nariz-2026" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <button id="syncsave">Conectar</button>
-      </div>
+      <h4>🔄 Sincronización entre celulares</h4>
+      <p>Esta hoja se sincroniza <b>automáticamente</b> entre el celular de Susy y el tuyo. No hay que configurar nada: abran el link en ambos y listo.</p>
       <div class="syncstatus" id="syncstatus"></div>
     </div>
   </details>
@@ -308,6 +304,7 @@ function timeToMin(t){ const[h,m]=t.split(':').map(Number); return h*60+m; }
 /* ===== Estado local-first ===== */
 const LS_STATE='susana_state_v2';
 const LS_CODE='susana_sync_code';
+const DEFAULT_CODE='sn7q2k9x4m1p8w3z'; // identificador fijo compartido (sincroniza sin escribir código)
 let state={};                 // key -> {v:0|1, t:timestamp}
 let db=null, stateRef=null, connRef=null;
 let syncOnline=false;
@@ -342,9 +339,9 @@ function mergeRemote(remote){
   render();
 }
 function connectSync(){
-  const code=(localStorage.getItem(LS_CODE)||'').trim();
+  const code=DEFAULT_CODE;
   updateSyncUI();
-  if(!code || !HAS_FB || typeof firebase==='undefined') return;
+  if(!HAS_FB || typeof firebase==='undefined') return;
   try{
     if(!db){ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }
   }catch(e){ try{ db=firebase.database(); }catch(e2){ updateSyncUI('error'); return; } }
@@ -382,13 +379,11 @@ function connectSync(){
 function updateSyncUI(force){
   const badge=document.getElementById('syncbadge');
   const status=document.getElementById('syncstatus');
-  const code=(localStorage.getItem(LS_CODE)||'').trim();
   let cls='off', txt, stxt, scol;
   if(!HAS_FB){ cls=''; txt='⚪ Sincronización no configurada'; stxt='La sincronización aún no está activada en esta página.'; scol='var(--muted)'; }
-  else if(!code){ cls=''; txt='⚪ Toca para sincronizar entre celulares'; stxt=''; scol='var(--muted)'; }
-  else if(force==='error'){ cls='off'; txt='🔴 Error de sincronización'; stxt='No se pudo conectar. Revisa el código o la conexión.'; scol='#b23b34'; }
-  else if(syncOnline){ cls='ok'; txt='🟢 Sincronizado ('+code+')'; stxt='✔ Conectado. Los cambios se comparten con el otro celular.'; scol='#1f8a5b'; }
-  else{ cls='wait'; txt='🟡 Conectando… ('+code+')'; stxt='Conectando…'; scol='#a5761f'; }
+  else if(force==='error'){ cls='off'; txt='🔴 Error de sincronización'; stxt='No se pudo conectar. Revisa tu conexión a internet.'; scol='#b23b34'; }
+  else if(syncOnline){ cls='ok'; txt='🟢 Sincronizado entre celulares'; stxt='✔ Conectado. Los cambios se comparten con el otro celular.'; scol='#1f8a5b'; }
+  else{ cls='wait'; txt='🟡 Conectando…'; stxt='Conectando…'; scol='#a5761f'; }
   if(badge){ badge.className='syncbadge '+cls; badge.textContent=txt; }
   if(status){ status.textContent=stxt; status.style.color=scol; }
 }
@@ -500,21 +495,12 @@ document.getElementById('resetday').onclick=()=>{
 document.getElementById('syncbadge').onclick=()=>{
   const s=document.getElementById('settings'); s.open=true;
   s.scrollIntoView({behavior:'smooth',block:'start'});
-  document.getElementById('synccode').focus();
-};
-document.getElementById('syncsave').onclick=()=>{
-  const code=document.getElementById('synccode').value.trim();
-  if(!code){ alert('Escribe un código de sincronización.'); return; }
-  localStorage.setItem(LS_CODE, code);
-  connectSync();
 };
 
 const d1=document.getElementById('day1start'), ns=document.getElementById('normalstart');
 d1.value=getStart('day1','15:00'); ns.value=getStart('normal','08:00');
 d1.onchange=()=>{ localStorage.setItem('susana_cfg_day1', d1.value); render(); };
 ns.onchange=()=>{ localStorage.setItem('susana_cfg_normal', ns.value); render(); };
-
-document.getElementById('synccode').value=(localStorage.getItem(LS_CODE)||'');
 
 /* ===== Arranque ===== */
 loadLocal();

@@ -144,6 +144,11 @@
   .refitem .rmeta{color:var(--muted);margin-top:3px}
   .refitem .rdur{display:inline-block;background:var(--accent-soft);color:var(--accent);
     font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;margin-top:6px}
+  .refitem .rstat{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;
+    border-radius:999px;margin-top:6px;margin-left:6px}
+  .rstat.active{background:#e3f4ec;color:#1f8a5b}
+  .rstat.done{background:#eef1f0;color:#8a9a97}
+  .rstat.soon{background:#eaf2ff;color:#3a5a8c}
 
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px;padding:0 10px}
   footer a{color:var(--accent);font-weight:700;text-decoration:none}
@@ -437,7 +442,10 @@ function render(){
     pills.appendChild(p);
   }
   const act=pills.querySelector('.pill.active');
-  if(act) act.scrollIntoView({inline:'center',block:'nearest'});
+  if(act){ // centrar la barra de días SOLO en horizontal (no mover la página)
+    const pr=pills.getBoundingClientRect(), ar=act.getBoundingClientRect();
+    pills.scrollLeft += (ar.left - pr.left) - (pr.width - ar.width)/2;
+  }
 
   const doses=dosesForDay(currentDay), groups={};
   doses.forEach(x=>{ if(!groups[x.clock])groups[x.clock]={off:x.off,items:[]}; groups[x.clock].items.push(x); if(x.off<groups[x.clock].off)groups[x.clock].off=x.off; });
@@ -474,15 +482,29 @@ function render(){
   document.getElementById('donemsg').style.display=(total&&done===total)?'block':'none';
 }
 
+function courseStatus(m){
+  const t=todayDayNumber(), len=m.to-m.from+1;
+  if(t<m.from){
+    const d=m.from-t;
+    return {cls:'soon', txt:(len===1?'Dosis única · Día '+m.from:'Empieza en '+d+(d===1?' día':' días'))};
+  }
+  if(t>m.to) return {cls:'done', txt:'✓ Completado'};
+  if(len===1) return {cls:'active', txt:'Es hoy'};
+  const cur=t-m.from+1, left=m.to-t;
+  let lt; if(left===0) lt='último día'; else if(left===1) lt='queda 1 día'; else lt='quedan '+left+' días';
+  return {cls:'active', txt:'Día '+cur+' de '+len+' · '+lt};
+}
 function renderRef(){
   const box=document.getElementById('reflist'); box.innerHTML='';
   MEDS.forEach(m=>{
     const el=document.createElement('div'); el.className='refitem';
     const dur=m.from===m.to?('Día '+m.from):('Días '+m.from+' a '+m.to);
+    const st=courseStatus(m);
     el.innerHTML='<div class="rnm">'+m.icon+' '+m.nm+' · <span style="color:var(--accent)">'+m.purpose+'</span></div>'+
       '<div class="rmeta">'+m.dose+' — '+m.freq+'</div>'+
       (m.note?'<div class="rmeta">ℹ️ '+m.note+'</div>':'')+
-      '<span class="rdur">'+dur+'</span>';
+      '<span class="rdur">'+dur+'</span>'+
+      '<span class="rstat '+st.cls+'">'+st.txt+'</span>';
     box.appendChild(el);
   });
 }
